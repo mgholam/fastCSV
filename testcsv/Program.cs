@@ -25,15 +25,15 @@ namespace testcsv
         static void Main(string[] args)
         {
             Stopwatch sw = new Stopwatch();
-            var listcars = fastCSV.ReadFile<cars>("..\\..\\..\\csvstandard.csv", true, ',', (o, c) =>
-                {
-                    o.Year = c[0];
-                    o.Make = c[1];
-                    o.Model = c[2];
-                    o.Description = c[3];
-                    o.Price = c[4];
-                    return true;
-                });
+            //var listcars = fastCSV.ReadFile<cars>("..\\..\\..\\csvstandard.csv", true, ',', (o, c) =>
+            //    {
+            //        o.Year = c[0];
+            //        o.Make = c[1];
+            //        o.Model = c[2];
+            //        o.Description = c[3];
+            //        o.Price = c[4];
+            //        return true;
+            //    });
             sw.Start();
 
             var line = 1;
@@ -59,8 +59,8 @@ namespace testcsv
                 });
             sw.Stop();
             Console.WriteLine("read " + line +" time : " + sw.Elapsed.TotalSeconds + " sec");
-            GC.Collect();
-            GC.Collect(2);
+            //GC.Collect();
+            //GC.Collect(2);
 
             sw.Restart();
             // specific items in list

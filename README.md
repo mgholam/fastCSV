@@ -7,12 +7,12 @@ Fast CSV reader writer in c#.
 - Fully CSV standard compliant 
   - Multi-line
   - Quoted columns
-  - Keeps spaces between delimitors
+  - Keeps spaces between delimiters
 - Really fast reading and writing of CSV files
 - Tiny 8kb DLL
 - Ability to get a typed list of objects from a CSV file
 - Ability to filter a CSV file while loading
-- Ability to specify a custom delimitor
+- Ability to specify a custom delimiter
 
 ## Usage
 
@@ -31,7 +31,7 @@ public class cars
 var listcars = fastCSV.ReadFile<cars>(
     "csvstandard.csv", // filename
     true,              // has header
-    ',',               // delimitor
+    ',',               // delimiter
     (o, c) =>          // to object function o : cars object, c : columns array read
     {
         o.Year = c[0];
@@ -46,7 +46,7 @@ var listcars = fastCSV.ReadFile<cars>(
 fastCSV.WriteFile<LocalWeatherData>(
     "filename2.csv",   // filename
     new string[] { "WBAN", "Date", "SkyCondition" }, // headers
-    '|',               // delimitor
+    '|',               // delimiter
     list,              // list of LocalWeatherData to save
     (o, c) =>          // from object function 
 	{
@@ -89,7 +89,7 @@ var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o,
 
 Loading the https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip file which has 4,496,263 rows on my machine as a relative comparison to other libraries:
 
-- **fastcsv** : 11.21s 638Mb used
+- **fastcsv** : 11.20s 639Mb used
 - **nreco.csv** : 19.05s  800Mb used
 - **.net string.Split()** : 11.50s 638Mb used
 - **tinycsvparser** : 34s 992Mb used
