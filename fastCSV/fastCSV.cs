@@ -43,11 +43,14 @@ public class fastCSV
                 if (multiline)
                 {
                     insb = true;
-                    sb.AppendLine(line);
+                    sb.Append(line);
                     var s = sb.ToString();
                     qc = CountOccurence(s, '\"');
                     if (qc % 2 == 1)
+                    {
+                        sb.AppendLine();
                         continue;
+                    }
                     cline = s;
                     sb.Clear();
                     insb = false;
@@ -213,16 +216,7 @@ public class fastCSV
                     var next = line.IndexOf(deliminator, index);
                     if (next < 0)
                     {
-                        // skip \r\n at the end when multiline
-                        int ll = linelen - 1;
-                        if (*(l + ll) == '\r' || *(l + ll) == '\n')
-                        {
-                            if (*(l + ll) == '\r' || *(l + ll) == '\n')
-                                ll--;
-                        }
-                        else
-                            ll = linelen;
-                        columns[col++] = new string(l, index, ll - index);
+                        columns[col++] = new string(l, index, linelen - index);
                         break;
                     }
                     columns[col++] = new string(l, index, next - index);
