@@ -32,7 +32,6 @@ namespace testcsv
             //        o.Model = c[2];
             //        o.Description = c[3];
             //        o.Price = c[4];
-
             //        return true;
             //    });
             sw.Start();
@@ -40,7 +39,7 @@ namespace testcsv
             var line = 1;
             if(File.Exists("201503hourly.txt") == false)
             {
-                Console.WriteLine("please download 201503hourly.txt from : https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip");
+                Console.WriteLine("Please download 201503hourly.txt from : https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip");
                 Console.WriteLine("press any key.");
                 Console.ReadKey();
                 return;

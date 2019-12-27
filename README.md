@@ -2,8 +2,6 @@
 
 Fast CSV reader writer in c#.
 
-
-
 ## Features
 
 - Fully CSV standard compliant 
@@ -34,7 +32,7 @@ var listcars = fastCSV.ReadFile<cars>(
     "csvstandard.csv", // filename
     true,              // has header
     ',',               // deliminator
-    (o, c) =>          // to object function o:cars object, c: columns array read
+    (o, c) =>          // to object function o : cars object, c : columns array read
     {
         o.Year = c[0];
         o.Make = c[1];
@@ -60,10 +58,10 @@ fastCSV.WriteFile<LocalWeatherData>(
 
 ## Helper functions for performance
 
-`fastCSV` has the following helper fiunctions:
+`fastCSV` has the following helper functions:
 
 - `int ToInt(string s, int index, int count)` creates an `int` from a substring 
-- `DateTime ToDateTimeISO(string value, bool UseUTCDateTime)` creates an ISO standard `DateTime` i.e. `yyyy-MM-ddTHH:mm:ss`  ( optional part`.nnn  Z`)
+- `DateTime ToDateTimeISO(string value, bool UseUTCDateTime)` creates an ISO standard `DateTime` i.e. `yyyy-MM-ddTHH:mm:ss`  ( optional part`.nnnZ`)
 
 ```c#
 public class LocalWeatherData
@@ -89,9 +87,9 @@ var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o,
 
 ## Performance
 
-Loading the https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip file which has 4496263 rows
+Loading the https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip file which has 4,496,263 rows on my machine as a relative comparison to other libraries:
 
 - **fastcsv** : 11.21s 638Mb used
 - **nreco.csv** : 19.05s  800Mb used
-- **string.split** : 11.50s 638Mb used
+- **.net string.Split()** : 11.50s 638Mb used
 - **tinycsvparser** : 34s 992Mb used
