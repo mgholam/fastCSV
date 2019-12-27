@@ -1,0 +1,15 @@
+
+bin
+obj
+RaptorDBdata
+*.suo
+*.cache
+*.gitignore
+*.lnk
+*.user
+RaptorDBData*
+.nuget
+silverlighttest*
+output
+.vs
+/*.nupkg
