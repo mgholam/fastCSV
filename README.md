@@ -7,12 +7,12 @@ Fast CSV reader writer in c#.
 - Fully CSV standard compliant 
   - Multi-line
   - Quoted columns
-  - Keeps spaces between deliminators
+  - Keeps spaces between delimitors
 - Really fast reading and writing of CSV files
 - Tiny 8kb DLL
 - Ability to get a typed list of objects from a CSV file
 - Ability to filter a CSV file while loading
-- Ability to specify a custom deliminator
+- Ability to specify a custom delimitor
 
 ## Usage
 
@@ -31,7 +31,7 @@ public class cars
 var listcars = fastCSV.ReadFile<cars>(
     "csvstandard.csv", // filename
     true,              // has header
-    ',',               // deliminator
+    ',',               // delimitor
     (o, c) =>          // to object function o : cars object, c : columns array read
     {
         o.Year = c[0];
@@ -46,7 +46,7 @@ var listcars = fastCSV.ReadFile<cars>(
 fastCSV.WriteFile<LocalWeatherData>(
     "filename2.csv",   // filename
     new string[] { "WBAN", "Date", "SkyCondition" }, // headers
-    '|',               // deliminator
+    '|',               // delimitor
     list,              // list of LocalWeatherData to save
     (o, c) =>          // from object function 
 	{

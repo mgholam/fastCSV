@@ -9,7 +9,7 @@ public class fastCSV
     public delegate void FromObj<T>(T obj, List<object> columns);
     private static int _COLCOUNT = 50;
 
-    public static List<T> ReadFile<T>(string filename, bool hasheader, char deliminator, ToOBJ<T> mapper) where T : new()
+    public static List<T> ReadFile<T>(string filename, bool hasheader, char delimitor, ToOBJ<T> mapper) where T : new()
     {
         string[] cols = null;
         List<T> list = new List<T>();
@@ -26,9 +26,9 @@ public class fastCSV
                     if (hasheader)
                     {
                         // actual col count
-                        int cc = CountOccurence(line, deliminator);
+                        int cc = CountOccurence(line, delimitor);
                         if (cc == 0)
-                            throw new Exception("File does not have '" + deliminator + "' as a deliminator");
+                            throw new Exception("File does not have '" + delimitor + "' as a delimitor");
                         cols = new string[cc + 1];
                         continue;
                     }
@@ -56,7 +56,7 @@ public class fastCSV
                     insb = false;
                 }
 
-                var c = ParseLine(cline, deliminator, cols);
+                var c = ParseLine(cline, delimitor, cols);
 
                 T o = new T();
                 var b = mapper(o, c);
@@ -72,14 +72,14 @@ public class fastCSV
         return list;
     }
 
-    public static void WriteFile<T>(string filename, string[] headers, char deliminator, List<T> list, FromObj<T> mapper)
+    public static void WriteFile<T>(string filename, string[] headers, char delimitor, List<T> list, FromObj<T> mapper)
     {
         using (FileStream f = new FileStream(filename, FileMode.Create, FileAccess.Write))
         {
             using (StreamWriter s = new StreamWriter(f))
             {
                 if (headers != null)
-                    s.WriteLine(string.Join(deliminator.ToString(), headers));
+                    s.WriteLine(string.Join(delimitor.ToString(), headers));
 
                 foreach (var o in list)
                 {
@@ -103,7 +103,7 @@ public class fastCSV
                         if (quote==false && str.IndexOf('\r') >= 0)
                             quote = true;
 
-                        if (quote == false && str.IndexOf(deliminator) >= 0)
+                        if (quote == false && str.IndexOf(delimitor) >= 0)
                             quote = true;
 
                         if (quote)
@@ -113,7 +113,7 @@ public class fastCSV
                             s.Write("\"");
 
                         if (i < cols.Count - 1)
-                            s.Write(deliminator);
+                            s.Write(delimitor);
                     }
                     s.WriteLine();
                 }
@@ -199,9 +199,9 @@ public class fastCSV
         return count;
     }
 
-    private unsafe static string[] ParseLine(string line, char deliminator, string[] columns)
+    private unsafe static string[] ParseLine(string line, char delimitor, string[] columns)
     {
-        //return line.Split(deliminator);
+        //return line.Split(delimitor);
         int col = 0;
         int linelen = line.Length;
         int index = 0;
@@ -213,7 +213,7 @@ public class fastCSV
                 if (*(l + index) != '\"')
                 {
                     // non quoted
-                    var next = line.IndexOf(deliminator, index);
+                    var next = line.IndexOf(delimitor, index);
                     if (next < 0)
                     {
                         columns[col++] = new string(l, index, linelen - index);
@@ -233,7 +233,7 @@ public class fastCSV
                     {
                         if (c == '\"')
                             qc++;
-                        if (c == deliminator && qc % 2 == 0)
+                        if (c == delimitor && qc % 2 == 0)
                             break;
                         c = *(l + index);
                     }
