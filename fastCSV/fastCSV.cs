@@ -100,7 +100,7 @@ public class fastCSV
                         if (quote == false && str.IndexOf('\n') >= 0)
                             quote = true;
 
-                        if (quote==false && str.IndexOf('\r') >= 0)
+                        if (quote == false && str.IndexOf('\r') >= 0)
                             quote = true;
 
                         if (quote == false && str.IndexOf(delimiter) >= 0)
@@ -201,7 +201,7 @@ public class fastCSV
 
     private unsafe static string[] ParseLine(string line, char delimiter, string[] columns)
     {
-        //return line.Split(delimitor);
+        //return line.Split(delimiter);
         int col = 0;
         int linelen = line.Length;
         int index = 0;

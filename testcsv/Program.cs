@@ -34,17 +34,18 @@ namespace testcsv
             //        o.Price = c[4];
             //        return true;
             //    });
+
             sw.Start();
 
             var line = 1;
-            if(File.Exists("201503hourly.txt") == false)
+            if(File.Exists("d:/201503hourly.txt") == false)
             {
                 Console.WriteLine("Please download 201503hourly.txt from : https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip");
                 Console.WriteLine("press any key.");
                 Console.ReadKey();
                 return;
             }
-            var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o, c) =>
+            var list = fastCSV.ReadFile<LocalWeatherData>("d:/201503hourly.txt", true, ',', (o, c) =>
                 {
                     bool add = true;
                     line++;
@@ -71,6 +72,7 @@ namespace testcsv
             //    c.Add(o.SkyCondition);
             //});
             //Console.WriteLine("write time : " + sw.Elapsed.TotalSeconds + " sec");
+            Console.WriteLine("press any key.");
             Console.ReadKey();
 
         }

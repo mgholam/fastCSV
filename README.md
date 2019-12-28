@@ -8,8 +8,8 @@ Fast CSV reader writer in c#.
   - Multi-line
   - Quoted columns
   - Keeps spaces between delimiters
-- Really fast reading and writing of CSV files
-- Tiny 8kb DLL
+- Really fast reading and writing of CSV files (see performance)
+- Tiny 8kb DLL compiled to `net40` or `netstandard20`
 - Ability to get a typed list of objects from a CSV file
 - Ability to filter a CSV file while loading
 - Ability to specify a custom delimiter
@@ -75,6 +75,7 @@ var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o,
     {
         bool add = true;
         o.WBAN = c[0];
+        // c[1] data is in "20150301" format
         o.Date = new DateTime(fastCSV.ToInt(c[1], 0, 4), 
                               fastCSV.ToInt(c[1], 4, 2), 
                               fastCSV.ToInt(c[1], 6, 2));
