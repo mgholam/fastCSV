@@ -123,6 +123,11 @@ public class fastCSV
         }
     }
 
+    public static int ToInt(string s)
+    {
+        return ToInt(s, 0, s.Length);
+    }
+
     public static unsafe int ToInt(string s, int index, int count)
     {
         int num = 0;
