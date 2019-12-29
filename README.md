@@ -60,6 +60,7 @@ fastCSV.WriteFile<LocalWeatherData>(
 
 `fastCSV` has the following helper functions:
 
+- `int ToInt(string s)` creates an `int` from a string
 - `int ToInt(string s, int index, int count)` creates an `int` from a substring 
 - `DateTime ToDateTimeISO(string value, bool UseUTCDateTime)` creates an ISO standard `DateTime` i.e. `yyyy-MM-ddTHH:mm:ss`  ( optional part`.nnnZ`)
 
