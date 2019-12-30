@@ -25,16 +25,18 @@ namespace testcsv
         static void Main(string[] args)
         {
             Stopwatch sw = new Stopwatch();
-            var listcars = fastCSV.ReadFile<cars>("..\\..\\..\\csvstandard.csv", true, ',', (o, c) =>
-                {
-                    o.Year = fastCSV.ToInt(c[0]);
-                    o.Make = c[1];
-                    o.Model = c[2];
-                    o.Description = c[3];
-                    o.Price = decimal.Parse(c[4]);
-                    return true;
-                });
-
+            if (File.Exists("..\\..\\..\\csvstandard.csv"))
+            {
+                var listcars = fastCSV.ReadFile<cars>("..\\..\\..\\csvstandard.csv", true, ',', (o, c) =>
+                   {
+                       o.Year = fastCSV.ToInt(c[0]);
+                       o.Make = c[1];
+                       o.Model = c[2];
+                       o.Description = c[3];
+                       o.Price = decimal.Parse(c[4]);
+                       return true;
+                   });
+            }
             var line = 1;
             if (File.Exists("d:/201503hourly.txt") == false)
             {
