@@ -6,10 +6,27 @@ using System.Text;
 
 public class fastCSV
 {
-    public delegate bool ToOBJ<T>(T obj, string[] columns);
+    public delegate bool ToOBJ<T>(T obj, COLUMNS columns);
     public delegate void FromObj<T>(T obj, List<object> columns);
     private static int _COLCOUNT = 50;
 
+
+    public class COLUMNS
+    {
+        public COLUMNS(CPointer[] cols)
+        {
+            _cols = cols;
+        }
+        CPointer[] _cols;
+
+        public string this[int idx]
+        {
+            get
+            {
+                return _cols[idx].ToString();//.Replace("\"\"", "\"");
+            }
+        }
+    }
     public class CPointer
     {
         public CPointer(char[] line, int start, int count)
@@ -19,9 +36,9 @@ public class fastCSV
             _count = count;
         }
 
-        private char[] _line;
-        private int _start;
-        private int _count;
+        public char[] _line;
+        public int _start;
+        public int _count;
 
         public new string ToString()
         {
@@ -29,7 +46,7 @@ public class fastCSV
         }
     }
 
-        class BufReader
+    class BufReader
     {
         public BufReader(StreamReader tr, int bufsize)
         {
@@ -40,13 +57,13 @@ public class fastCSV
 
         StreamReader _tr;
         int _fileStart = 0;
-        int _bufsize = 32 * 1024;
+        int _bufsize = 0;
         int _bufread = 0;
         int _bufidx = 0;
         char[] _buffer;
         bool EOF = false;
 
-        public string ReadLine()
+        public CPointer ReadLine()
         {
             if (_bufread == 0 || _bufidx >= _bufread)
             {
@@ -95,20 +112,19 @@ public class fastCSV
                 _fileStart += start;
                 return ReadLine();
             }
-            return new string(_buffer, start, end - start);
+            return new CPointer(_buffer, start, end - start);
         }
-
     }
 
     public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) where T : new()
     {
-        string[] cols = null;
+        CPointer[] cols = null;
         List<T> list = new List<T>(10000);
 
         int linenum = -1;
         StringBuilder sb = new StringBuilder();
         CreateObject co = FastCreateInstance<T>();
-        var br = new BufReader(File.OpenText(filename), 1024 * 1024);
+        var br = new BufReader(File.OpenText(filename), 64 * 1024);
         var line = br.ReadLine();
         if (line == null)
             return list;
@@ -121,14 +137,14 @@ public class fastCSV
                 int cc = CountOccurence(line, delimiter);
                 if (cc == 0)
                     throw new Exception("File does not have '" + delimiter + "' as a delimiter");
-                cols = new string[cc + 1];
+                cols = new CPointer[cc + 1];
             }
             else
-                cols = new string[_COLCOUNT];
+                cols = new CPointer[_COLCOUNT];
         }
-        do 
+        do
         {
-            //try
+            try
             {
                 line = br.ReadLine();
                 if (line == null)
@@ -138,14 +154,14 @@ public class fastCSV
 
                 T o = (T)co();
                 //new T();
-                var b = mapper(o, c);
+                var b = mapper(o, new COLUMNS(c));
                 if (b)
                     list.Add(o);
             }
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("error on line " + linenum, ex);
-            //}
+            catch (Exception ex)
+            {
+                throw new Exception("error on line " + linenum, ex);
+            }
         } while (true);
 
         return list;
@@ -291,12 +307,12 @@ public class fastCSV
             return new DateTime(year, month, day, hour, min, sec, ms, DateTimeKind.Utc).ToLocalTime();
     }
 
-    private unsafe static int CountOccurence(string text, char c)
+    private unsafe static int CountOccurence(CPointer text, char c)
     {
         int count = 0;
-        int len = text.Length;
-        int index = -1;
-        fixed (char* s = text)
+        int len = text._count + text._start;
+        int index = text._start;
+        fixed (char* s = text._line)
         {
             while (index++ < len)
             {
@@ -308,27 +324,37 @@ public class fastCSV
         return count;
     }
 
-    private unsafe static string[] ParseLine(string line, char delimiter, string[] columns)
+    private unsafe static CPointer[] ParseLine(CPointer line, char delimiter, CPointer[] columns)
     {
         //return line.Split(delimiter);
         int col = 0;
-        int linelen = line.Length;
-        int index = 0;
+        int linelen = line._count + line._start;
+        int index = line._start; //0;
 
-        fixed (char* l = line)
+        fixed (char* l = line._line)
         {
             while (index < linelen)
             {
                 if (*(l + index) != '\"')
                 {
                     // non quoted
-                    var next = line.IndexOf(delimiter, index);
+                    //var next = line.IndexOf(delimiter, index);
+                    var next = -1;
+                    for (int i = index; i < linelen; i++)
+                    {
+                        if (*(l + i) == delimiter)
+                        {
+                            next = i;
+                            break;
+                        }
+                    }
+
                     if (next < 0)
                     {
-                        columns[col++] = new string(l, index, linelen - index);
+                        columns[col++] = new CPointer(line._line, index, linelen - index);
                         break;
                     }
-                    columns[col++] = new string(l, index, next - index);
+                    columns[col++] = new CPointer(line._line, index, next - index);
                     index = next + 1;
                 }
                 else
@@ -346,7 +372,9 @@ public class fastCSV
                             break;
                         c = *(l + index);
                     }
-                    columns[col++] = new string(l, start + 1, index - start - 3).Replace("\"\"", "\"");
+
+                    var s = new string(line._line, start + 1, index - start - 3).Replace("\"\"", "\"");
+                    columns[col++] = new CPointer(s.ToCharArray(), 0, s.Length);// line._line, start + 1, index - start - 3);
                 }
             }
         }

@@ -87,6 +87,8 @@ namespace testcsv
                     //    add = false;
                     return add;
                 });
+
+
             //var list = new List<LocalWeatherData>();
 
             //using (var text = File.OpenText("d:/201503hourly.txt"))
