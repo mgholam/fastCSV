@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection.Emit;
 using System.Text;
 
 public class fastCSV
@@ -9,65 +10,143 @@ public class fastCSV
     public delegate void FromObj<T>(T obj, List<object> columns);
     private static int _COLCOUNT = 50;
 
+    public class CPointer
+    {
+        public CPointer(char[] line, int start, int count)
+        {
+            _line = line;
+            _start = start;
+            _count = count;
+        }
+
+        private char[] _line;
+        private int _start;
+        private int _count;
+
+        public new string ToString()
+        {
+            return new string(_line, _start, _count);
+        }
+    }
+
+        class BufReader
+    {
+        public BufReader(StreamReader tr, int bufsize)
+        {
+            _tr = tr;
+            _bufsize = bufsize;
+            _buffer = new char[bufsize];
+        }
+
+        StreamReader _tr;
+        int _fileStart = 0;
+        int _bufsize = 32 * 1024;
+        int _bufread = 0;
+        int _bufidx = 0;
+        char[] _buffer;
+        bool EOF = false;
+
+        public string ReadLine()
+        {
+            if (_bufread == 0 || _bufidx >= _bufread)
+            {
+                if (EOF)
+                    return null;
+                _tr.BaseStream.Seek(_fileStart, SeekOrigin.Begin);
+                _bufread = _tr.ReadBlock(_buffer, 0, _bufsize);
+                _bufidx = 0;
+                if (_bufread < _bufsize)
+                    EOF = true;
+                if (_bufread == 0)
+                    return null;
+            }
+            int start = _bufidx;
+            int end = _bufidx;
+            int qc = 0;
+            bool read = false;
+            while (_bufidx < _bufread)
+            {
+                var c = _buffer[_bufidx++];
+
+                if (c == '\"')
+                    qc++;
+                if ((c == '\r' || c == '\n') && qc % 2 == 0)
+                {
+                    read = true;
+                    end = _bufidx - 1;
+                    if (_bufidx >= _bufread)
+                    {
+                        read = false;
+                        break;
+                    }
+                    c = _buffer[_bufidx++];
+                    if (c != '\r' && c != '\n')
+                        _bufidx--;
+                    break;
+                }
+            }
+            if (EOF && _bufidx == _bufread)
+            {
+                end = _bufread;
+            }
+
+            if (EOF == false && read == false)
+            {
+                _fileStart += start;
+                return ReadLine();
+            }
+            return new string(_buffer, start, end - start);
+        }
+
+    }
+
     public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) where T : new()
     {
         string[] cols = null;
-        List<T> list = new List<T>();
+        List<T> list = new List<T>(10000);
+
         int linenum = -1;
         StringBuilder sb = new StringBuilder();
-        bool insb = false;
-        foreach (var line in File.ReadLines(filename))
+        CreateObject co = FastCreateInstance<T>();
+        var br = new BufReader(File.OpenText(filename), 1024 * 1024);
+        var line = br.ReadLine();
+        if (line == null)
+            return list;
+        linenum++;
+        if (linenum == 0)
         {
-            try
+            if (hasheader)
             {
-                linenum++;
-                if (linenum == 0)
-                {
-                    if (hasheader)
-                    {
-                        // actual col count
-                        int cc = CountOccurence(line, delimiter);
-                        if (cc == 0)
-                            throw new Exception("File does not have '" + delimiter + "' as a delimiter");
-                        cols = new string[cc + 1];
-                        continue;
-                    }
-                    else
-                        cols = new string[_COLCOUNT];
-                }
-                var qc = CountOccurence(line, '\"');
-                bool multiline = qc % 2 == 1 || insb;
+                // actual col count
+                int cc = CountOccurence(line, delimiter);
+                if (cc == 0)
+                    throw new Exception("File does not have '" + delimiter + "' as a delimiter");
+                cols = new string[cc + 1];
+            }
+            else
+                cols = new string[_COLCOUNT];
+        }
+        do 
+        {
+            //try
+            {
+                line = br.ReadLine();
+                if (line == null)
+                    break;
 
-                string cline = line;
-                // if multiline add line to sb and continue
-                if (multiline)
-                {
-                    insb = true;
-                    sb.Append(line);
-                    var s = sb.ToString();
-                    qc = CountOccurence(s, '\"');
-                    if (qc % 2 == 1)
-                    {
-                        sb.AppendLine();
-                        continue;
-                    }
-                    cline = s;
-                    sb.Clear();
-                    insb = false;
-                }
+                var c = ParseLine(line, delimiter, cols);
 
-                var c = ParseLine(cline, delimiter, cols);
-
-                T o = new T();
+                T o = (T)co();
+                //new T();
                 var b = mapper(o, c);
                 if (b)
                     list.Add(o);
             }
-            catch (Exception ex)
-            {
-                throw new Exception("error on line " + linenum, ex);
-            }
-        }
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("error on line " + linenum, ex);
+            //}
+        } while (true);
 
         return list;
     }
@@ -121,6 +200,31 @@ public class fastCSV
             }
             f.Close();
         }
+    }
+
+    private delegate object CreateObject();
+
+    private static CreateObject FastCreateInstance<T>()
+    {
+        CreateObject c = null;
+        Type objtype = typeof(T);
+        try
+        {
+            if (objtype.IsClass)
+            {
+                DynamicMethod dynMethod = new DynamicMethod("_fcic", objtype, null, true);
+                ILGenerator ilGen = dynMethod.GetILGenerator();
+                ilGen.Emit(OpCodes.Newobj, objtype.GetConstructor(Type.EmptyTypes));
+                ilGen.Emit(OpCodes.Ret);
+                c = (CreateObject)dynMethod.CreateDelegate(typeof(CreateObject));
+            }
+        }
+        catch (Exception exc)
+        {
+            throw new Exception(string.Format("Failed to fast create instance for type '{0}' from assembly '{1}'",
+                objtype.FullName, objtype.AssemblyQualifiedName), exc);
+        }
+        return c;
     }
 
     public static int ToInt(string s)

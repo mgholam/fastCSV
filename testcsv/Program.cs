@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -24,6 +25,13 @@ namespace testcsv
     {
         static void Main(string[] args)
         {
+            //var tr = File.OpenText("d:/201503hourly.txt");
+            //var b = new char[1024];
+            //var ii = tr.ReadBlock(b, 0, 1024);
+            //tr.BaseStream.Seek(100, SeekOrigin.Begin);
+            //ii = tr.ReadBlock(b, 0, 1024);
+
+
             Stopwatch sw = new Stopwatch();
             if (File.Exists("..\\..\\..\\csvstandard.csv"))
             {
@@ -36,6 +44,25 @@ namespace testcsv
                        o.Price = decimal.Parse(c[4]);
                        return true;
                    });
+
+                var nl = new List<cars>();
+
+                using (var text = File.OpenText("..\\..\\..\\csvstandard.csv"))
+                {
+                    var c = new NReco.Csv.CsvReader(text);
+                    c.TrimFields = false;
+                    c.Read(); // Skip the header
+                    while (c.Read())
+                    {
+                        var o = new cars();
+                        o.Year = fastCSV.ToInt(c[0]);
+                        o.Make = c[1];
+                        o.Model = c[2];
+                        o.Description = c[3];
+                        o.Price = decimal.Parse(c[4]);
+                        nl.Add(o);
+                    }
+                }
             }
             var line = 1;
             if (File.Exists("d:/201503hourly.txt") == false)
@@ -60,6 +87,28 @@ namespace testcsv
                     //    add = false;
                     return add;
                 });
+            //var list = new List<LocalWeatherData>();
+
+            //using (var text = File.OpenText("d:/201503hourly.txt"))
+            //{
+            //    var c = new NReco.Csv.CsvReader(text);
+            //    c.Read(); // Skip the header
+            //    while (c.Read())
+            //    {
+            //        var o = new LocalWeatherData();
+            //        bool add = true;
+            //        line++;
+            //        o.WBAN = c[0];
+            //        o.Date = new DateTime(fastCSV.ToInt(c[1], 0, 4),
+            //            fastCSV.ToInt(c[1], 4, 2),
+            //            fastCSV.ToInt(c[1], 6, 2));
+            //        o.SkyCondition = c[4];
+            //        //if (o.Date.Day % 2 == 0)
+            //        //    add = false;
+            //        if (add)
+            //            list.Add(o);
+            //    }
+            //}
             sw.Stop();
             Console.WriteLine("read " + line + " time : " + sw.Elapsed.TotalSeconds + " sec");
             //GC.Collect();
