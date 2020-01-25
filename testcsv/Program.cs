@@ -45,24 +45,23 @@ namespace testcsv
                        return true;
                    });
 
-                var nl = new List<cars>();
-
-                using (var text = File.OpenText("..\\..\\..\\csvstandard.csv"))
-                {
-                    var c = new NReco.Csv.CsvReader(text);
-                    c.TrimFields = false;
-                    c.Read(); // Skip the header
-                    while (c.Read())
-                    {
-                        var o = new cars();
-                        o.Year = fastCSV.ToInt(c[0]);
-                        o.Make = c[1];
-                        o.Model = c[2];
-                        o.Description = c[3];
-                        o.Price = decimal.Parse(c[4]);
-                        nl.Add(o);
-                    }
-                }
+                //var nl = new List<cars>();
+                //using (var text = File.OpenText("..\\..\\..\\csvstandard.csv"))
+                //{
+                //    var c = new NReco.Csv.CsvReader(text);
+                //    c.TrimFields = false;
+                //    c.Read(); // Skip the header
+                //    while (c.Read())
+                //    {
+                //        var o = new cars();
+                //        o.Year = fastCSV.ToInt(c[0]);
+                //        o.Make = c[1];
+                //        o.Model = c[2];
+                //        o.Description = c[3];
+                //        o.Price = decimal.Parse(c[4]);
+                //        nl.Add(o);
+                //    }
+                //}
             }
             var line = 1;
             if (File.Exists("d:/201503hourly.txt") == false)
@@ -105,8 +104,8 @@ namespace testcsv
             //            fastCSV.ToInt(c[1], 4, 2),
             //            fastCSV.ToInt(c[1], 6, 2));
             //        o.SkyCondition = c[4];
-            //        //if (o.Date.Day % 2 == 0)
-            //        //    add = false;
+            //        if (o.Date.Day % 2 == 0)
+            //            add = false;
             //        if (add)
             //            list.Add(o);
             //    }

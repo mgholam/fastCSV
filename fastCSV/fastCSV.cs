@@ -11,7 +11,7 @@ public class fastCSV
     private static int _COLCOUNT = 50;
 
 
-    public class COLUMNS
+    public struct COLUMNS
     {
         public COLUMNS(CPointer[] cols)
         {
@@ -27,7 +27,7 @@ public class fastCSV
             }
         }
     }
-    public class CPointer
+    public struct CPointer
     {
         public CPointer(char[] line, int start, int count)
         {
@@ -68,14 +68,14 @@ public class fastCSV
             if (_bufread == 0 || _bufidx >= _bufread)
             {
                 if (EOF)
-                    return null;
+                    return new CPointer();
                 _tr.BaseStream.Seek(_fileStart, SeekOrigin.Begin);
                 _bufread = _tr.ReadBlock(_buffer, 0, _bufsize);
                 _bufidx = 0;
                 if (_bufread < _bufsize)
                     EOF = true;
                 if (_bufread == 0)
-                    return null;
+                    return new CPointer();
             }
             int start = _bufidx;
             int end = _bufidx;
@@ -126,7 +126,7 @@ public class fastCSV
         CreateObject co = FastCreateInstance<T>();
         var br = new BufReader(File.OpenText(filename), 64 * 1024);
         var line = br.ReadLine();
-        if (line == null)
+        if (line._count == 0)
             return list;
         linenum++;
         if (linenum == 0)
@@ -147,7 +147,7 @@ public class fastCSV
             try
             {
                 line = br.ReadLine();
-                if (line == null)
+                if (line._count == 0)
                     break;
 
                 var c = ParseLine(line, delimiter, cols);
