@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection.Emit;
-using System.Text;
 
 public class fastCSV
 {
@@ -10,41 +9,42 @@ public class fastCSV
     public delegate void FromObj<T>(T obj, List<object> columns);
     private static int _COLCOUNT = 50;
 
-
     public struct COLUMNS
     {
-        public COLUMNS(CPointer[] cols)
+        public COLUMNS(MGSpan[] cols)
         {
             _cols = cols;
         }
-        CPointer[] _cols;
+        MGSpan[] _cols;
 
         public string this[int idx]
         {
             get
             {
-                return _cols[idx].ToString();//.Replace("\"\"", "\"");
+                return _cols[idx].ToString();
+            }
+        }
+
+        public struct MGSpan
+        {
+            public MGSpan(char[] line, int start, int count)
+            {
+                buf = line;
+                Start = start;
+                Count = count;
+            }
+
+            public char[] buf;
+            public int Start;
+            public int Count;
+
+            public new string ToString()
+            {
+                return new string(buf, Start, Count);
             }
         }
     }
-    public struct CPointer
-    {
-        public CPointer(char[] line, int start, int count)
-        {
-            _line = line;
-            _start = start;
-            _count = count;
-        }
 
-        public char[] _line;
-        public int _start;
-        public int _count;
-
-        public new string ToString()
-        {
-            return new string(_line, _start, _count);
-        }
-    }
 
     class BufReader
     {
@@ -56,26 +56,33 @@ public class fastCSV
         }
 
         StreamReader _tr;
-        int _fileStart = 0;
         int _bufsize = 0;
         int _bufread = 0;
         int _bufidx = 0;
         char[] _buffer;
         bool EOF = false;
+        int reload = 0;
 
-        public CPointer ReadLine()
+        internal int FillBuffer(int offset)
+        {
+            var len = _bufsize - offset;
+            var read = _tr.ReadBlock(_buffer, offset, len);
+            read += offset;
+            if (read != _bufsize)
+                EOF = true;
+            _bufidx = 0;
+            return read;
+        }
+
+        internal COLUMNS.MGSpan ReadLine()
         {
             if (_bufread == 0 || _bufidx >= _bufread)
             {
                 if (EOF)
-                    return new CPointer();
-                _tr.BaseStream.Seek(_fileStart, SeekOrigin.Begin);
-                _bufread = _tr.ReadBlock(_buffer, 0, _bufsize);
-                _bufidx = 0;
-                if (_bufread < _bufsize)
-                    EOF = true;
+                    return new COLUMNS.MGSpan();
+                _bufread =  FillBuffer(0);
                 if (_bufread == 0)
-                    return new CPointer();
+                    return new COLUMNS.MGSpan();
             }
             int start = _bufidx;
             int end = _bufidx;
@@ -109,60 +116,67 @@ public class fastCSV
 
             if (EOF == false && read == false)
             {
-                _fileStart += start;
+                reload++;
+                if (reload > 1)
+                    throw new Exception("line too long for buffer");
+                // move data
+                Array.Copy(_buffer, start, _buffer, 0, _bufsize - start);
+                var len = _bufsize - start;
+                _bufread = FillBuffer(len);
+                if (_bufread == 0)
+                    return new COLUMNS.MGSpan();
                 return ReadLine();
             }
-            return new CPointer(_buffer, start, end - start);
+            reload = 0;
+            return new COLUMNS.MGSpan(_buffer, start, end - start);
         }
     }
 
     public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) where T : new()
     {
-        CPointer[] cols = null;
+        COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
 
-        int linenum = -1;
-        StringBuilder sb = new StringBuilder();
+        int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
         var br = new BufReader(File.OpenText(filename), 64 * 1024);
         var line = br.ReadLine();
-        if (line._count == 0)
+        if (line.Count == 0)
             return list;
-        linenum++;
-        if (linenum == 0)
+
+        if (hasheader)
         {
-            if (hasheader)
-            {
-                // actual col count
-                int cc = CountOccurence(line, delimiter);
-                if (cc == 0)
-                    throw new Exception("File does not have '" + delimiter + "' as a delimiter");
-                cols = new CPointer[cc + 1];
-            }
-            else
-                cols = new CPointer[_COLCOUNT];
+            // actual col count
+            int cc = CountOccurence(line, delimiter);
+            if (cc == 0)
+                throw new Exception("File does not have '" + delimiter + "' as a delimiter");
+            cols = new COLUMNS.MGSpan[cc + 1];
         }
-        do
+        else
+            cols = new COLUMNS.MGSpan[_COLCOUNT];
+
+        while (true)
         {
             try
             {
                 line = br.ReadLine();
-                if (line._count == 0)
+                linenum++;
+                if (line.Count == 0)
                     break;
 
                 var c = ParseLine(line, delimiter, cols);
 
                 T o = (T)co();
-                //new T();
+                      //new T();
                 var b = mapper(o, new COLUMNS(c));
                 if (b)
                     list.Add(o);
             }
             catch (Exception ex)
             {
-                throw new Exception("error on line " + linenum, ex);
+                throw new Exception("error on line " + linenum +"\r\n" + line, ex);
             }
-        } while (true);
+        } 
 
         return list;
     }
@@ -307,12 +321,12 @@ public class fastCSV
             return new DateTime(year, month, day, hour, min, sec, ms, DateTimeKind.Utc).ToLocalTime();
     }
 
-    private unsafe static int CountOccurence(CPointer text, char c)
+    private unsafe static int CountOccurence(COLUMNS.MGSpan text, char c)
     {
         int count = 0;
-        int len = text._count + text._start;
-        int index = text._start;
-        fixed (char* s = text._line)
+        int len = text.Count + text.Start;
+        int index = text.Start;
+        fixed (char* s = text.buf)
         {
             while (index++ < len)
             {
@@ -324,21 +338,20 @@ public class fastCSV
         return count;
     }
 
-    private unsafe static CPointer[] ParseLine(CPointer line, char delimiter, CPointer[] columns)
+    private unsafe static COLUMNS.MGSpan[] ParseLine(COLUMNS.MGSpan line, char delimiter, COLUMNS.MGSpan[] columns)
     {
         //return line.Split(delimiter);
         int col = 0;
-        int linelen = line._count + line._start;
-        int index = line._start; //0;
+        int linelen = line.Count + line.Start;
+        int index = line.Start; 
 
-        fixed (char* l = line._line)
+        fixed (char* l = line.buf)
         {
             while (index < linelen)
             {
                 if (*(l + index) != '\"')
                 {
                     // non quoted
-                    //var next = line.IndexOf(delimiter, index);
                     var next = -1;
                     for (int i = index; i < linelen; i++)
                     {
@@ -351,10 +364,10 @@ public class fastCSV
 
                     if (next < 0)
                     {
-                        columns[col++] = new CPointer(line._line, index, linelen - index);
+                        columns[col++] = new COLUMNS.MGSpan(line.buf, index, linelen - index);
                         break;
                     }
-                    columns[col++] = new CPointer(line._line, index, next - index);
+                    columns[col++] = new COLUMNS.MGSpan(line.buf, index, next - index);
                     index = next + 1;
                 }
                 else
@@ -373,8 +386,8 @@ public class fastCSV
                         c = *(l + index);
                     }
 
-                    var s = new string(line._line, start + 1, index - start - 3).Replace("\"\"", "\"");
-                    columns[col++] = new CPointer(s.ToCharArray(), 0, s.Length);// line._line, start + 1, index - start - 3);
+                    var s = new string(line.buf, start + 1, index - start - 3).Replace("\"\"", "\""); // ugly
+                    columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
             }
         }

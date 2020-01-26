@@ -35,9 +35,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NReco.Csv, Version=0.0.0.0, Culture=neutral, PublicKeyToken=ef4fd95322a66714, processorArchitecture=MSIL">
-      <HintPath>..\packages\NReco.Csv.1.0.0\lib\net45\NReco.Csv.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,9 +50,6 @@
       <Project>{bacdddaa-a2b6-4439-a913-04b46eb0444d}</Project>
       <Name>fastCSV</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

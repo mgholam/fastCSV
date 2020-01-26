@@ -87,11 +87,26 @@ var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o,
     });
 ```
 
-## Performance
+## Performance v1
 
 Loading the https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip file which has 4,496,263 rows on my machine as a relative comparison to other libraries:
 
 - **fastcsv** : 11.20s 639Mb used
-- **nreco.csv** : 19.05s  800Mb used
+- **nreco.csv** : 6.62s  800Mb used
 - **.net string.Split()** : 11.50s 638Mb used
 - **tinycsvparser** : 34s 992Mb used
+
+# v2
+
+Rewritten the internals:
+
+- using a char buffer to read from the file instead of `File.ReadLines()`
+- using `Span` like `MGSpan` data structure for .net4
+- columns are only converted to string when used in the delegate
+- fast create object IL instead of `new T()`
+
+## Performance 
+
+- **fastcsv net4**: 6.27s 753Mb used
+- **fastcsv core** : 6.51s 669Mb used
+
