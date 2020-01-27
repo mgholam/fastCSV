@@ -119,7 +119,7 @@ public class fastCSV
                 reload++;
                 if (reload > 1)
                     throw new Exception("line too long for buffer");
-                // move data
+                // copy data to start of buffer
                 Array.Copy(_buffer, start, _buffer, 0, _bufsize - start);
                 var len = _bufsize - start;
                 _bufread = FillBuffer(len);
@@ -132,7 +132,7 @@ public class fastCSV
         }
     }
 
-    public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) where T : new()
+    public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) //where T : new()
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);

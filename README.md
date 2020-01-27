@@ -107,6 +107,6 @@ Rewritten the internals:
 
 ## Performance 
 
-- **fastcsv net4**: 6.27s 753Mb used
-- **fastcsv core** : 6.51s 669Mb used
+- **fastcsv net4**: 6.27s  753Mb used
+- **fastcsv core** : 6.51s  669Mb used
 
