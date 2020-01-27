@@ -92,7 +92,7 @@ var list = fastCSV.ReadFile<LocalWeatherData>("201503hourly.txt", true, ',', (o,
 Loading the https://www.ncdc.noaa.gov/orders/qclcd/QCLCD201503.zip file which has 4,496,263 rows on my machine as a relative comparison to other libraries:
 
 - **fastcsv** : 11.20s 639Mb used
-- **nreco.csv** : 6.62s  800Mb used
+- **nreco.csv** : 6.76s  800Mb used 
 - **.net string.Split()** : 11.50s 638Mb used
 - **tinycsvparser** : 34s 992Mb used
 
