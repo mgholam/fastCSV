@@ -373,21 +373,24 @@ public class fastCSV
                 else
                 {
                     // quoted string change "" -> "
-                    int qc = 1;
-                    int start = index;
-                    char c = *(l + ++index);
-                    // find matching quote until delim or EOL
-                    while (index++ < linelen)
-                    {
-                        if (c == '\"')
-                            qc++;
-                        if (c == delimiter && qc % 2 == 0)
-                            break;
-                        c = *(l + index);
-                    }
+					int qc = 1;
+					int start = index;
+					int lastNonEscapedEndIndex = index + 2;
+					char c = *(l + ++index);
+					// find matching quote until delim or EOL
+					while (index++ < linelen)
+					{
+						if (c == '\"')
+							qc++;
+						if (c != '\r' && c != '\n' && c != '\0')
+							lastNonEscapedEndIndex = index + 1;
+						if (c == delimiter && qc % 2 == 0)
+							break;
+						c = *(l + index);
+					}
 
-                    var s = new string(line.buf, start + 1, index - start - 3).Replace("\"\"", "\""); // ugly
-                    columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
+					var s = new string(line.buf, start + 1, lastNonEscapedEndIndex - start - 3).Replace("\"\"", "\""); // ugly
+					columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
             }
         }
