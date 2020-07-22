@@ -27,6 +27,8 @@ public class fastCSV
 
         public struct MGSpan
         {
+            public static MGSpan empty { get; private set; } = new MGSpan(new char[] { '\0' }, 0, 0);
+
             public MGSpan(char[] line, int start, int count)
             {
                 buf = line;
@@ -389,6 +391,11 @@ public class fastCSV
                     var s = new string(line.buf, start + 1, index - start - 3).Replace("\"\"", "\""); // ugly
                     columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
+            }
+
+            while (col < columns.Length)
+            {
+                columns[col++] = COLUMNS.MGSpan.empty;
             }
         }
 
