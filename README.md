@@ -110,3 +110,15 @@ Rewritten the internals:
 - **fastcsv net4**: 6.27s  753Mb used
 - **fastcsv core** : 6.51s  669Mb used
 
+# v2.0.1
+
+```c#
+// new overloads for more control
+// has headers
+ReadFile<T>(string filename, char delimiter, ToOBJ<T> mapper) 
+// backward compatibility to v2.0.0
+ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper)
+// no headers and you specify the column count
+ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper) 
+```
+

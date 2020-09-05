@@ -132,7 +132,22 @@ public class fastCSV
         }
     }
 
-    public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper) //where T : new()
+    public static List<T> ReadFile<T>(string filename, char delimiter, ToOBJ<T> mapper) 
+    {
+        return ReadFile(filename, true, _COLCOUNT, delimiter, mapper);
+    }
+
+    public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper)
+    {
+        return ReadFile(filename, hasheader, _COLCOUNT, delimiter, mapper);
+    }
+
+    public static List<T> ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper) 
+    {
+        return ReadFile(filename, false, colcount, delimiter, mapper);
+    }
+
+    private static List<T> ReadFile<T>(string filename, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper) 
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
@@ -153,7 +168,7 @@ public class fastCSV
             cols = new COLUMNS.MGSpan[cc + 1];
         }
         else
-            cols = new COLUMNS.MGSpan[_COLCOUNT];
+            cols = new COLUMNS.MGSpan[colcount];
 
         while (true)
         {
