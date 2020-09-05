@@ -1,3 +1,4 @@
 v2.0.1
 ------
 - new overloads 
+- ignore escaped characters at the end of a quoted line (thanks to Denis Samuel)
