@@ -1,3 +1,7 @@
+v2.0.2
+------
+- ToString() null check (thanks to Martijn)
+
 v2.0.1
 ------
 - new overloads 

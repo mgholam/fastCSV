@@ -40,7 +40,9 @@ public class fastCSV
 
             public new string ToString()
             {
-                return new string(buf, Start, Count);
+                if (buf != null)
+                    return new string(buf, Start, Count);
+                else return "";
             }
         }
     }
@@ -80,7 +82,7 @@ public class fastCSV
             {
                 if (EOF)
                     return new COLUMNS.MGSpan();
-                _bufread =  FillBuffer(0);
+                _bufread = FillBuffer(0);
                 if (_bufread == 0)
                     return new COLUMNS.MGSpan();
             }
@@ -132,7 +134,7 @@ public class fastCSV
         }
     }
 
-    public static List<T> ReadFile<T>(string filename, char delimiter, ToOBJ<T> mapper) 
+    public static List<T> ReadFile<T>(string filename, char delimiter, ToOBJ<T> mapper)
     {
         return ReadFile(filename, true, _COLCOUNT, delimiter, mapper);
     }
@@ -142,12 +144,12 @@ public class fastCSV
         return ReadFile(filename, hasheader, _COLCOUNT, delimiter, mapper);
     }
 
-    public static List<T> ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper) 
+    public static List<T> ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         return ReadFile(filename, false, colcount, delimiter, mapper);
     }
 
-    private static List<T> ReadFile<T>(string filename, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper) 
+    private static List<T> ReadFile<T>(string filename, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
@@ -182,16 +184,16 @@ public class fastCSV
                 var c = ParseLine(line, delimiter, cols);
 
                 T o = (T)co();
-                      //new T();
+                //new T();
                 var b = mapper(o, new COLUMNS(c));
                 if (b)
                     list.Add(o);
             }
             catch (Exception ex)
             {
-                throw new Exception("error on line " + linenum +"\r\n" + line, ex);
+                throw new Exception("error on line " + linenum + "\r\n" + line, ex);
             }
-        } 
+        }
 
         return list;
     }
@@ -358,7 +360,7 @@ public class fastCSV
         //return line.Split(delimiter);
         int col = 0;
         int linelen = line.Count + line.Start;
-        int index = line.Start; 
+        int index = line.Start;
 
         fixed (char* l = line.buf)
         {
@@ -388,24 +390,24 @@ public class fastCSV
                 else
                 {
                     // quoted string change "" -> "
-					int qc = 1;
-					int start = index;
-					int lastNonEscapedEndIndex = index + 2;
-					char c = *(l + ++index);
-					// find matching quote until delim or EOL
-					while (index++ < linelen)
-					{
-						if (c == '\"')
-							qc++;
-						if (c != '\r' && c != '\n' && c != '\0')
-							lastNonEscapedEndIndex = index + 1;
-						if (c == delimiter && qc % 2 == 0)
-							break;
-						c = *(l + index);
-					}
+                    int qc = 1;
+                    int start = index;
+                    int lastNonEscapedEndIndex = index + 2;
+                    char c = *(l + ++index);
+                    // find matching quote until delim or EOL
+                    while (index++ < linelen)
+                    {
+                        if (c == '\"')
+                            qc++;
+                        if (c != '\r' && c != '\n' && c != '\0')
+                            lastNonEscapedEndIndex = index + 1;
+                        if (c == delimiter && qc % 2 == 0)
+                            break;
+                        c = *(l + index);
+                    }
 
-					var s = new string(line.buf, start + 1, lastNonEscapedEndIndex - start - 3).Replace("\"\"", "\""); // ugly
-					columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
+                    var s = new string(line.buf, start + 1, lastNonEscapedEndIndex - start - 3).Replace("\"\"", "\""); // ugly
+                    columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
             }
         }
