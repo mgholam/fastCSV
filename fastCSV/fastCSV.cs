@@ -157,12 +157,13 @@ public class fastCSV
         int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
         var br = new BufReader(File.OpenText(filename), 64 * 1024);
-        var line = br.ReadLine();
-        if (line.Count == 0)
-            return list;
+        COLUMNS.MGSpan line = new COLUMNS.MGSpan();
 
         if (hasheader)
         {
+            line = br.ReadLine();
+            if (line.Count == 0)
+                return list;
             // actual col count
             int cc = CountOccurence(line, delimiter);
             if (cc == 0)

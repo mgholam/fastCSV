@@ -1,3 +1,7 @@
+v2.0.3
+------
+- bug fix reading first line when hasheader = false
+
 v2.0.2
 ------
 - ToString() null check (thanks to Martijn)
