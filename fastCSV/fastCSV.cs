@@ -136,27 +136,32 @@ public class fastCSV
 
     public static List<T> ReadFile<T>(string filename, char delimiter, ToOBJ<T> mapper)
     {
-        return ReadFile(filename, true, _COLCOUNT, delimiter, mapper);
+        return ReadData(File.OpenText(filename), true, _COLCOUNT, delimiter, mapper);
     }
 
     public static List<T> ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper)
     {
-        return ReadFile(filename, hasheader, _COLCOUNT, delimiter, mapper);
+        return ReadData(File.OpenText(filename), hasheader, _COLCOUNT, delimiter, mapper);
     }
 
     public static List<T> ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper)
     {
-        return ReadFile(filename, false, colcount, delimiter, mapper);
+        return ReadData(File.OpenText(filename), false, colcount, delimiter, mapper);
     }
 
-    private static List<T> ReadFile<T>(string filename, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
+    public static List<T> ReadStream<T>(StreamReader sr, int colcount, char delimiter, ToOBJ<T> mapper)
+    {
+        return ReadData(sr, false, colcount, delimiter, mapper);
+    }
+
+    private static List<T> ReadData<T>(StreamReader sr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
 
         int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
-        var br = new BufReader(File.OpenText(filename), 64 * 1024);
+        var br = new BufReader(sr, 64 * 1024);
         COLUMNS.MGSpan line = new COLUMNS.MGSpan();
 
         if (hasheader)

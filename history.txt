@@ -1,6 +1,7 @@
 v2.0.3
 ------
 - bug fix reading first line when hasheader = false
+- added reading from StreamReader overload
 
 v2.0.2
 ------
