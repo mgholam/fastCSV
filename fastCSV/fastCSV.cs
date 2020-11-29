@@ -149,19 +149,24 @@ public class fastCSV
         return ReadData(File.OpenText(filename), false, colcount, delimiter, mapper);
     }
 
-    public static List<T> ReadStream<T>(TextReader sr, int colcount, char delimiter, ToOBJ<T> mapper)
+    public static List<T> ReadStream<T>(StreamReader sr, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         return ReadData(sr, false, colcount, delimiter, mapper);
     }
 
-    private static List<T> ReadData<T>(TextReader sr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
+    public static List<T> ReadText<T>(TextReader tr, int colcount, char delimiter, ToOBJ<T> mapper)
+    {
+        return ReadData(tr, false, colcount, delimiter, mapper);
+    }
+
+    private static List<T> ReadData<T>(TextReader tr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
 
         int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
-        var br = new BufReader(sr, 64 * 1024);
+        var br = new BufReader(tr, 64 * 1024);
         COLUMNS.MGSpan line = new COLUMNS.MGSpan();
 
         if (hasheader)
