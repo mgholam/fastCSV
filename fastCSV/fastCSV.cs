@@ -50,14 +50,14 @@ public class fastCSV
 
     class BufReader
     {
-        public BufReader(StreamReader tr, int bufsize)
+        public BufReader(TextReader tr, int bufsize)
         {
             _tr = tr;
             _bufsize = bufsize;
             _buffer = new char[bufsize];
         }
 
-        StreamReader _tr;
+        TextReader _tr;
         int _bufsize = 0;
         int _bufread = 0;
         int _bufidx = 0;
@@ -154,14 +154,19 @@ public class fastCSV
         return ReadData(sr, false, colcount, delimiter, mapper);
     }
 
-    private static List<T> ReadData<T>(StreamReader sr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
+    public static List<T> ReadText<T>(TextReader tr, int colcount, char delimiter, ToOBJ<T> mapper)
+    {
+        return ReadData(tr, false, colcount, delimiter, mapper);
+    }
+
+    private static List<T> ReadData<T>(TextReader tr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
 
         int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
-        var br = new BufReader(sr, 64 * 1024);
+        var br = new BufReader(tr, 64 * 1024);
         COLUMNS.MGSpan line = new COLUMNS.MGSpan();
 
         if (hasheader)
