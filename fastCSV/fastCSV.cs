@@ -164,14 +164,14 @@ public class fastCSV
         return ReadData(sr, false, colcount, delimiter, mapper);
     }
 
-    private static List<T> ReadData<T>(TextReader tr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
+    private static List<T> ReadData<T>(TextReader sr, bool hasheader, int colcount, char delimiter, ToOBJ<T> mapper)
     {
         COLUMNS.MGSpan[] cols;
         List<T> list = new List<T>(10000);
 
         int linenum = 0;
         CreateObject co = FastCreateInstance<T>();
-        var br = new BufReader(tr, 64 * 1024);
+        var br = new BufReader(sr, 64 * 1024);
         COLUMNS.MGSpan line = new COLUMNS.MGSpan();
 
         if (hasheader)
@@ -207,10 +207,12 @@ public class fastCSV
             }
             catch (Exception ex)
             {
+                sr.Close();
                 throw new Exception("error on line " + linenum + "\r\n" + line, ex);
             }
         }
 
+        sr.Close();
         return list;
     }
 
@@ -373,7 +375,6 @@ public class fastCSV
 
     private unsafe static COLUMNS.MGSpan[] ParseLine(COLUMNS.MGSpan line, char delimiter, COLUMNS.MGSpan[] columns)
     {
-        //return line.Split(delimiter);
         int col = 0;
         int linelen = line.Count + line.Start;
         int index = line.Start;
@@ -382,7 +383,6 @@ public class fastCSV
         {
             while (index < linelen)
             {
-                columns[col] = new COLUMNS.MGSpan();
                 if (*(l + index) != '\"')
                 {
                     // non quoted
@@ -426,6 +426,13 @@ public class fastCSV
                     var s = new string(line.buf, start + 1, lastNonEscapedEndIndex - start - 3).Replace("\"\"", "\""); // ugly
                     columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
+            }
+
+            while(col < columns.Length)
+            {
+                var c = columns[col++];
+                c.Start = 0;
+                c.Count = 0;
             }
         }
 
