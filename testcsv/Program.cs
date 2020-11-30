@@ -52,6 +52,7 @@ namespace testcsv
                        o.Price = decimal.Parse(c[4]);
                        return true;
                    });
+                var i = listcars.Count;
             }
             var line = 1;
             if (File.Exists("d:/201503hourly.txt") == false)

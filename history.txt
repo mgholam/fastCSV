@@ -1,3 +1,9 @@
+v2.0.5
+------
+- bug fix empty trailing data columns showing prev row data
+- switched to TextReader
+- more ReadStream() overloads
+
 v2.0.4
 ------
 - added reading from StreamReader overload
