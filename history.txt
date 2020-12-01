@@ -1,4 +1,4 @@
-v2.0.6
+v2.0.7
 ------
 - bug fix empty trailing data columns showing prev row data
 - switched to TextReader

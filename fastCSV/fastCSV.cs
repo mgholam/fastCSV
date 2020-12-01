@@ -430,9 +430,7 @@ public class fastCSV
 
             while(col < columns.Length)
             {
-                var c = columns[col++];
-                c.Start = 0;
-                c.Count = 0;
+                columns[col++] = new COLUMNS.MGSpan();
             }
         }
 

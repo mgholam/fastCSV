@@ -38,9 +38,34 @@ namespace testcsv
 
     class Program
     {
+        public class ABC
+        {
+            public string a { get; set; }
+            public string b { get; set; }
+            public string c { get; set; }
+
+            public new string ToString()
+            {
+                return a + "," + b + "," + c;
+            }
+        }
+
         static void Main(string[] args)
         {
-            Stopwatch sw = new Stopwatch();
+
+            string data = @"11,12,13
+21,22,23
+31,,33
+41,42,43
+,52,";
+            var ooo = fastCSV.ReadStream<ABC>(new StringReader(data), false, ',', (o,c) =>
+              {
+                  o.a = c[0];
+                  o.b = c[1];
+                  o.c = c[2];
+                  return true;
+              });
+
             if (File.Exists("..\\..\\..\\csvstandard.csv"))
             {
                 var listcars = fastCSV.ReadFile<cars>("..\\..\\..\\csvstandard.csv", true, ',', (o, c) =>
@@ -54,6 +79,7 @@ namespace testcsv
                    });
                 var i = listcars.Count;
             }
+
             var line = 1;
             if (File.Exists("d:/201503hourly.txt") == false)
             {
@@ -63,25 +89,7 @@ namespace testcsv
                 return;
             }
 
-            //var llist = fastCSV.ReadFile<Archive>("d:/madavi/archive.csv", true, '|', (o, c) =>
-            //    {
-            //        bool add = true;
-            //        int i = 0;
-            //        o.id = new Guid(c[i++]);
-            //        o.From = c[i++];
-            //        o.To = c[i++];
-            //        o.Subject = c[i++];
-            //        o.Type = c[i++];
-            //        o.LetterNumber = c[i++];
-            //        o.OrgLetterNumber = c[i++];
-            //        o.Owner = c[i++];
-            //        o.Status = c[i++];
-            //        o.LetterDate = c[i++];
-            //        o.isPrivate = bool.Parse(c[i++]);
-            //        o.Created = fastCSV.ToDateTimeISO(c[i++], false);
-            //        return add;
-            //    });
-
+            Stopwatch sw = new Stopwatch();
             sw.Start();
             var list = fastCSV.ReadFile<LocalWeatherData>("d:/201503hourly.txt", true, ',', (o, c) =>
                 {
