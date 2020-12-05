@@ -2,6 +2,16 @@
 
 Fast CSV reader writer in c#.
 
+## Install
+
+fastCSV is available on NuGet.org as [mgholam.fastCSV](https://www.nuget.org/packages/mgholam.fastCSV/).
+
+```
+> dotnet add package mgholam.fastCSV
+```
+
+![Nuget](https://img.shields.io/nuget/v/mgholam.fastCSV) ![Nuget](https://img.shields.io/nuget/dt/mgholam.fastCSV)
+
 ## Features
 
 - Fully CSV standard compliant 
