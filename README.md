@@ -132,3 +132,12 @@ ReadFile<T>(string filename, bool hasheader, char delimiter, ToOBJ<T> mapper)
 ReadFile<T>(string filename, int colcount, char delimiter, ToOBJ<T> mapper) 
 ```
 
+# v2.0.5
+
+```c#
+// new overloads for reading from streams
+ReadStream<T>(TextReader sr, char delimiter, ToOBJ<T> mapper)
+ReadStream<T>(TextReader sr, bool hasheader, char delimiter, ToOBJ<T> mapper)
+ReadStream<T>(TextReader sr, int colcount, char delimiter, ToOBJ<T> mapper)
+```
+
