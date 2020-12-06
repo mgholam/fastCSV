@@ -53,6 +53,13 @@ namespace testcsv
         static void Main(string[] args)
         {
 
+            var l = fastCSV.ReadStream<ABC>(new StringReader("a,b\r\n"), false, ',', (o, c) =>
+             {
+                 o.a = c[0];
+                 o.b = c[1];
+                 return true;
+             });
+
             string data = @"11,12,13
 21,22,23
 31,,33

@@ -111,7 +111,7 @@ public class fastCSV
                     break;
                 }
             }
-            if (EOF && _bufidx == _bufread)
+            if (EOF && end == start)
             {
                 end = _bufread;
             }
@@ -198,7 +198,7 @@ public class fastCSV
                     break;
 
                 var c = ParseLine(line, delimiter, cols);
-
+                
                 T o = (T)co();
                 //new T();
                 var b = mapper(o, new COLUMNS(c));
@@ -408,27 +408,30 @@ public class fastCSV
                 {
                     // quoted string change "" -> "
                     int qc = 1;
-                    int start = index;
-                    int lastNonEscapedEndIndex = index + 2;
+                    int start = index + 1;
+                    int end = index + 1;
                     char c = *(l + ++index);
                     // find matching quote until delim or EOL
                     while (index++ < linelen)
                     {
                         if (c == '\"')
                             qc++;
-                        if (c != '\r' && c != '\n' && c != '\0')
-                            lastNonEscapedEndIndex = index + 1;
+                        if (c != '\r' && c != '\n')//&& c != '\0')
+                            end = index - 1;
                         if (c == delimiter && qc % 2 == 0)
+                        {
+                            end = index - 2; // delim and trailing quote
                             break;
+                        }
                         c = *(l + index);
                     }
 
-                    var s = new string(line.buf, start + 1, lastNonEscapedEndIndex - start - 3).Replace("\"\"", "\""); // ugly
+                    var s = new string(line.buf, start, end - start).Replace("\"\"", "\""); // ugly
                     columns[col++] = new COLUMNS.MGSpan(s.ToCharArray(), 0, s.Length);
                 }
             }
 
-            while(col < columns.Length)
+            while (col < columns.Length)
             {
                 columns[col++] = new COLUMNS.MGSpan();
             }
