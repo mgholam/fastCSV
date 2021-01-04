@@ -25,6 +25,8 @@ public class fastCSV
             }
         }
 
+        public int Count { get { return _cols.Length; } }
+
         public struct MGSpan
         {
             public MGSpan(char[] line, int start, int count)

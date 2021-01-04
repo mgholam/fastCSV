@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 
@@ -52,6 +54,12 @@ namespace testcsv
 
         static void Main(string[] args)
         {
+            //DataTable dt = new DataTable();
+            //dt.Columns.Add("col1");
+            //dt.Columns.Add("col2");
+            //dt.Columns.Add("col3");
+            //dt.Columns.Add("col4");
+            //dt.Columns.Add("col5");
 
             var l = fastCSV.ReadStream<ABC>(new StringReader("a,b\r\n"), false, ',', (o, c) =>
              {
@@ -65,8 +73,9 @@ namespace testcsv
 31,,33
 41,42,43
 ,52,";
-            var ooo = fastCSV.ReadStream<ABC>(new StringReader(data), false, ',', (o,c) =>
+            var ooo = fastCSV.ReadStream<ABC>(new StringReader(data), false, ',', (o, c) =>
               {
+                  
                   o.a = c[0];
                   o.b = c[1];
                   o.c = c[2];
@@ -82,6 +91,7 @@ namespace testcsv
                        o.Model = c[2];
                        o.Description = c[3];
                        o.Price = decimal.Parse(c[4]);
+                       //dt.Rows.Add(new object[] { c[0], c[1], c[2], c[3], c[4] });
                        return true;
                    });
                 var i = listcars.Count;
