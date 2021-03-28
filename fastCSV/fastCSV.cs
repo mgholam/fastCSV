@@ -11,11 +11,14 @@ public class fastCSV
 
     public struct COLUMNS
     {
-        public COLUMNS(MGSpan[] cols)
+        public COLUMNS(MGSpan[] cols, string[] names)
         {
             _cols = cols;
+            _names = names;
         }
         MGSpan[] _cols;
+        string[] _names;
+
 
         public string this[int idx]
         {
@@ -26,6 +29,10 @@ public class fastCSV
         }
 
         public int Count { get { return _cols.Length; } }
+        public string ColumnName(int idx)
+        {
+            return _names[idx];
+        }
 
         public struct MGSpan
         {
@@ -175,6 +182,7 @@ public class fastCSV
         CreateObject co = FastCreateInstance<T>();
         var br = new BufReader(sr, 64 * 1024);
         COLUMNS.MGSpan line = new COLUMNS.MGSpan();
+        string[] names = new string[colcount];
 
         if (hasheader)
         {
@@ -185,6 +193,7 @@ public class fastCSV
             int cc = CountOccurence(line, delimiter);
             if (cc == 0)
                 throw new Exception("File does not have '" + delimiter + "' as a delimiter");
+            names = GetNames(line, delimiter);
             cols = new COLUMNS.MGSpan[cc + 1];
         }
         else
@@ -200,10 +209,10 @@ public class fastCSV
                     break;
 
                 var c = ParseLine(line, delimiter, cols);
-                
+
                 T o = (T)co();
                 //new T();
-                var b = mapper(o, new COLUMNS(c));
+                var b = mapper(o, new COLUMNS(c, names));
                 if (b)
                     list.Add(o);
             }
@@ -373,6 +382,30 @@ public class fastCSV
             }
         }
         return count;
+    }
+    private unsafe static string[] GetNames(COLUMNS.MGSpan text, char c)
+    {
+        int len = text.Count + text.Start;
+        int index = text.Start;
+        List<string> list = new List<string>();
+        fixed (char* s = text.buf)
+        {
+            while (index++ < len)
+            {
+                char ch = *(s + index);
+                if (ch == c)
+                {
+                    text.Count = index - text.Start;
+                    list.Add(text.ToString());
+                    text.Start = index + 1;
+                }
+                if (c == '\r' || c == '\n')
+                    break;
+            }
+            text.Count = index - text.Start - 1;
+            list.Add(text.ToString());
+        }
+        return list.ToArray();
     }
 
     private unsafe static COLUMNS.MGSpan[] ParseLine(COLUMNS.MGSpan line, char delimiter, COLUMNS.MGSpan[] columns)

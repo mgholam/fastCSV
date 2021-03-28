@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.IO;
 
 public class tests
@@ -154,6 +155,7 @@ c,d
 
         var listcars = fastCSV.ReadFile<cars>("csvstandard.csv", true, ',', (o, c) =>
         {
+            Console.WriteLine(c.ColumnName(4));
             o.Year = fastCSV.ToInt(c[0]);
             o.Make = c[1];
             o.Model = c[2];
